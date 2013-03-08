@@ -18,7 +18,7 @@
 
 #pragma semicolon 1
 
-#define RANDOM_CLASS 10
+#define RANDOM_CLASS 0
 new Handle:g_FavClassCookie;
 
 public Plugin:myinfo =
@@ -60,7 +60,7 @@ public OnClientPostAdminCheck(client){
 		}
 
 		//Set class
-		if(favClass == RANDOM_CLASS || favClass == 0){
+		if(favClass == RANDOM_CLASS){
 			TF2_SetPlayerClass(client, randomClass());
 		}else{
 			TF2_SetPlayerClass(client, intToClass(favClass));
@@ -102,11 +102,11 @@ public TFClassType:intToClass(i){
 			}
 		case 2:
 			{
-				return TFClass_Sniper;
+				return TFClass_Soldier;
 			}
 		case 3:
 			{
-				return TFClass_Soldier;
+				return TFClass_Pyro;
 			}
 		case 4:
 			{
@@ -114,23 +114,23 @@ public TFClassType:intToClass(i){
 			}
 		case 5:
 			{
-				return TFClass_Medic;
+				return TFClass_Heavy;
 			}
 		case 6:
 			{
-				return TFClass_Heavy;
+				return TFClass_Engineer;
 			}
 		case 7:
 			{
-				return TFClass_Pyro;
+				return TFClass_Medic;
 			}
 		case 8:
 			{
-				return TFClass_Spy;
+				return TFClass_Sniper;
 			}
 		case 9:
 			{
-				return TFClass_Engineer;
+				return TFClass_Spy;
 			}
 	}
 
@@ -159,7 +159,7 @@ public Action:Command_ChangeFavoriteClass(client, args){
 		AddMenuItem(menu, "7", "Medic");
 		AddMenuItem(menu, "8", "Sniper");
 		AddMenuItem(menu, "9", "Spy");
-		AddMenuItem(menu, "10", "Random");
+		AddMenuItem(menu, "0", "Random");
 		SetMenuExitButton(menu, false);
 		SetMenuPagination(menu, MENU_NO_PAGINATION);
 		DisplayMenu(menu, client, 20);
@@ -174,11 +174,12 @@ public Action:Command_ChangeFavoriteClass(client, args){
 
 public ClassMenuHandler(Handle:menu, MenuAction:action, client, param){
 	if(action == MenuAction_Select){
-		new String:info[32];
-		new bool:found = GetMenuItem(menu, param, info, sizeof(info));
-		PrintToChat(client, "You selected item: %d (found? %d info: %s)", param, found, info);
-
-	}else if (action == MenuAction_Cancel){
+		new String:sClass[32];
+		new bool:found = GetMenuItem(menu, param, sClass, sizeof(sClass));
+		//PrintToChat(client, "You selected item: %d (found? %d info: %s)", param, found, info);
+	
+		//TODO is this cookie-safe?
+		SetClientCookie(client, g_FavClassCookie, sClass);
 
 	}else if (action == MenuAction_End){
 		CloseHandle(menu);
