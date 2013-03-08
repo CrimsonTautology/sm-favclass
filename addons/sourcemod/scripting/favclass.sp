@@ -11,11 +11,15 @@
  */
 
 #include <sourcemod>
+#include <clientprefs>
 #include <smlib>
 #include <tf2>
 #include <tf2_stocks>
 
 #pragma semicolon 1
+
+#define RANDOM_CLASS 10
+new Handle:g_FavClassCookie;
 
 public Plugin:myinfo =
 {
@@ -34,10 +38,7 @@ public OnPluginStart()
 
 
 	RegConsoleCmd("sm_favclass", Command_ChangeFavoriteClass);
-	RegConsoleCmd("sm_tst2", Command_Tst2);
-	RegConsoleCmd("sm_tst3", tst3);
-	RegConsoleCmd("sm_tst4", tst4);
-	RegConsoleCmd("sm_tst5", tst5);
+	g_FavClassCookie = RegClientCookie("favclass_class", "Favorite Class", CookieAccess_Protected);
 }
 
 
@@ -48,14 +49,29 @@ public OnClientPostAdminCheck(client){
 	//If client is real player
 	if(client && !IsClientReplay(client) && !IsClientSourceTV(client)){
 		ChangeClientTeam(client, team:teamWithLeastPlayers());
-		TF2_SetPlayerClass(client, randomClass());
+
+		new favClass = 0;
+		//Determine if we can get cookie info
+		if (AreClientCookiesCached(client)){
+			decl String:sFavClass[11];
+			GetClientCookie(client, g_FavClassCookie, sFavClass, sizeof(sFavClass));
+			favClass = StringToInt(sFavClass);
+
+		}
+
+		//Set class
+		if(favClass == RANDOM_CLASS || favClass == 0){
+			TF2_SetPlayerClass(client, randomClass());
+		}else{
+			TF2_SetPlayerClass(client, TFClassType:favClass);
+		}
 	}
 
 }
 
 /**
-	Determine which team has less players and return that one
-*/
+  Determine which team has less players and return that one
+ */
 public TFTeam:teamWithLeastPlayers(){
 	new red = 0;
 	new blu = 0;
@@ -64,7 +80,7 @@ public TFTeam:teamWithLeastPlayers(){
 	//For each player in the game
 	for (new client=1; client <= MaxClients; client++) {
 		if(!IsClientAuthorized(client)){
-				continue;
+			continue;
 		}
 
 		team = TFTeam:GetClientTeam(client);
@@ -79,43 +95,43 @@ public TFTeam:teamWithLeastPlayers(){
 }
 
 public TFClassType:randomClass(){
-	switch( Math_GetRandomInt(0, 8)){
-		case 0:
-		{
-			return TFClass_Scout;
-		}
+	switch( Math_GetRandomInt(1, 9)){
 		case 1:
-		{
-			return TFClass_Sniper;
-		}
+			{
+				return TFClass_Scout;
+			}
 		case 2:
-		{
-			return TFClass_Soldier;
-		}
+			{
+				return TFClass_Sniper;
+			}
 		case 3:
-		{
-			return TFClass_DemoMan;
-		}
+			{
+				return TFClass_Soldier;
+			}
 		case 4:
-		{
-			return TFClass_Medic;
-		}
+			{
+				return TFClass_DemoMan;
+			}
 		case 5:
-		{
-			return TFClass_Heavy;
-		}
+			{
+				return TFClass_Medic;
+			}
 		case 6:
-		{
-			return TFClass_Pyro;
-		}
+			{
+				return TFClass_Heavy;
+			}
 		case 7:
-		{
-			return TFClass_Spy;
-		}
+			{
+				return TFClass_Pyro;
+			}
 		case 8:
-		{
-			return TFClass_Engineer;
-		}
+			{
+				return TFClass_Spy;
+			}
+		case 9:
+			{
+				return TFClass_Engineer;
+			}
 	}
 
 	return TFClass_Unknown;
@@ -141,19 +157,3 @@ public Action:Command_ChangeFavoriteClass(client, args){
 }
 
 
-
-
-public Action:Command_Tst2(client, args){
-	PrintToChatAll("Hit tst2");
-	return Plugin_Handled;
-}
-public Action:tst3(client, args){
-	PrintToChatAll("Hit tst3jk");
-	return Plugin_Handled;
-}
-public Action:tst4(client, args){
-	return Plugin_Handled;
-}
-public Action:tst5(client, args){
-	return Plugin_Handled;
-}
