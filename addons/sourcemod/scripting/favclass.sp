@@ -63,7 +63,7 @@ public OnClientPostAdminCheck(client){
 		if(favClass == RANDOM_CLASS || favClass == 0){
 			TF2_SetPlayerClass(client, randomClass());
 		}else{
-			TF2_SetPlayerClass(client, TFClassType:favClass);
+			TF2_SetPlayerClass(client, intToClass(favClass));
 		}
 	}
 
@@ -94,8 +94,8 @@ public TFTeam:teamWithLeastPlayers(){
 	return red < blu ? TFTeam_Red : TFTeam_Blue;
 }
 
-public TFClassType:randomClass(){
-	switch( Math_GetRandomInt(1, 9)){
+public TFClassType:intToClass(i){
+	switch(i){
 		case 1:
 			{
 				return TFClass_Scout;
@@ -137,6 +137,10 @@ public TFClassType:randomClass(){
 	return TFClass_Unknown;
 }
 
+public TFClassType:randomClass(){
+	return intToClass( Math_GetRandomInt(1, 9));
+}
+
 
 public Action:Command_ChangeFavoriteClass(client, args){
 	if (!client) {
@@ -144,16 +148,40 @@ public Action:Command_ChangeFavoriteClass(client, args){
 	}
 
 	if (args == 0) {
-		//TODO display menu
-		//ReplyToCommand(client, "[SM]FFFFFFF Nomgrep Incorrect Syntax:  !nomsearch <searchstring>");
-		return Plugin_Handled;
+		new Handle:menu = CreateMenu(ClassMenuHandler);
+		SetMenuTitle(menu, "Select Favorite Class");
+		AddMenuItem(menu, "1", "Scout");
+		AddMenuItem(menu, "2", "Soldier");
+		AddMenuItem(menu, "3", "Pyro");
+		AddMenuItem(menu, "4", "Demoman");
+		AddMenuItem(menu, "5", "Heavy");
+		AddMenuItem(menu, "6", "Engineer");
+		AddMenuItem(menu, "7", "Medic");
+		AddMenuItem(menu, "8", "Sniper");
+		AddMenuItem(menu, "9", "Spy");
+		AddMenuItem(menu, "10", "Random");
+		SetMenuExitButton(menu, false);
+		SetMenuPagination(menu, MENU_NO_PAGINATION);
+		DisplayMenu(menu, client, 20);
 	}else{
 		//TODO determine which class is the argument
 
 		//TODO couldn't determine class, show menu
 	}
 
-	return Plugin_Continue;	
+	return Plugin_Handled;
 }
 
+public ClassMenuHandler(Handle:menu, MenuAction:action, client, param){
+	if(action == MenuAction_Select){
+		new String:info[32];
+		new bool:found = GetMenuItem(menu, param, info, sizeof(info));
+		PrintToChat(client, "You selected item: %d (found? %d info: %s)", param, found, info);
 
+	}else if (action == MenuAction_Cancel){
+
+	}else if (action == MenuAction_End){
+		CloseHandle(menu);
+	}
+
+}
